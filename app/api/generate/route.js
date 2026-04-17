@@ -64,7 +64,7 @@ function normalizeResult(data) {
     type: t?.type === "folder" ? "folder" : "file",
   }));
 
-  const result = {
+  return {
     projectName: String(data.projectName || "generated-project"),
     displayName: String(data.displayName || "Generated Project"),
     prompt: String(data.prompt || ""),
@@ -96,25 +96,6 @@ function normalizeResult(data) {
     treeCount: projectTree.length,
     mode: "live-vercel-openai",
   };
-
-  if (!result.logs.length) {
-    result.logs = [
-      "Prompt ricevuto",
-      "Generazione AI completata",
-      "Package normalizzato",
-      "Preview pronta",
-    ];
-  }
-
-  if (!result.validation.length) {
-    result.validation = [
-      { id: "v1", name: "Project package exists", passed: true },
-      { id: "v2", name: "Screens generated", passed: result.screens.length > 0 },
-      { id: "v3", name: "Files generated", passed: result.files.length > 0 },
-    ];
-  }
-
-  return result;
 }
 
 export async function GET() {
@@ -135,10 +116,7 @@ export async function POST(req) {
     }
 
     if (!process.env.OPENAI_API_KEY) {
-      return Response.json(
-        { error: "Manca OPENAI_API_KEY su Vercel" },
-        { status: 500 }
-      );
+      return Response.json({ error: "Manca OPENAI_API_KEY su Vercel" }, { status: 500 });
     }
 
     const systemPrompt = `
@@ -241,7 +219,7 @@ Regole:
 
     try {
       parsed = JSON.parse(raw);
-    } catch (err) {
+    } catch {
       return Response.json(
         {
           error: "Il modello non ha restituito JSON valido",
@@ -261,4 +239,4 @@ Regole:
       { status: 500 }
     );
   }
-        }
+}
